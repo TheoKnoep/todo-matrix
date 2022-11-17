@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- Minified version -->
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+    <style>
+        tr:hover {
+            background-color: #ffca3645;
+        }
+
+        .step-mark {
+            text-align: center;
+        }
+        .task-name {
+            cursor:pointer;
+        }
+        .mark {
+            display: block;
+            width: 24px; 
+            height: 24px; 
+            border-radius: 4px;
+            background: black;
+            margin: auto; 
+        }
+        [data-col = "0"] .mark {
+            background-color: red;
+        }
+        [data-col = "1"] .mark {
+            background-color: orange;
+        }
+        [data-col = "2"] .mark {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    
+
+    <main class="table-container">
+
+    </main>
+    <button onclick="addTask(''); ">Ajouter une tâche</button>
+
+
+
+
+    <script>
+        let tasks = initTaskList(); 
+        displayTable(); 
+
+
+        /** UTILS */
+        function initTaskList() {
+            return JSON.parse(localStorage.getItem('tasklist')) || ''; 
+        }
+
+        function saveTasksList() {
+            localStorage.setItem('tasklist', JSON.stringify(tasks));
+        }
+
+
+
+        function createTables() {
+            if (!tasks || !tasks.tasks.length) { return 'Aucune tâche à afficher' }
+
+            let tableContent = ''; 
+            tasks.tasks.forEach((task, index) => {
+                let cells = ''; 
+                
+                for (let i = 0; i < tasks.steps.length; i++) {
+                    let mark = "";
+                    if ( tasks.links[index] === i) { mark = "<div class='mark'></div>" }
+                    cells += `<td class="step-mark" data-row="${index}" data-col="${i}">${mark}</td>`; 
+                }
+                tableContent += `<tr>
+                                    <td data-task-index="${index}" class="task-name" contenteditable>${task}</td>
+                                    ${cells}
+                                </tr>`
+            });
+
+            return `<table>
+                    ${ createTableHead() }
+                    ${ tableContent }
+                </table>`; 
+        }
+
+
+        function createTableHead() {
+            let th = '<th>Tâches</th>'; 
+            tasks.steps.forEach(step => {
+                th += `<th>${step}</th>`; 
+            })
+            return '<tr>' + th + '</tr>'; 
+        }
+
+
+        function listenCells() {
+            document.querySelectorAll('td.step-mark').forEach(td => {
+                td.addEventListener('click', event => {
+                    let infos = event.currentTarget; 
+                    console.log(infos.dataset.row, infos.dataset.col); 
+                    changeStepOfTask(infos.dataset.row, infos.dataset.col); 
+                })
+            }); 
+            document.querySelectorAll('td.task-name').forEach(td => {
+                td.addEventListener('input', event => {
+                    console.log('input', event.currentTarget.dataset.taskIndex, event.currentTarget.textContent);
+                    let index = event.currentTarget.dataset.taskIndex; 
+                    let name = event.currentTarget.textContent; 
+                    editTaskName(index, name); 
+                })
+                td.addEventListener('blur', event => {
+                    let index = event.currentTarget.dataset.taskIndex; 
+                    let name = event.currentTarget.textContent; 
+                    if (!name.length) { deleteTask(index) }
+                })
+            })
+        }
+
+        function changeStepOfTask(taskIndex, newStepIndex) {
+            console.log(tasks.links[taskIndex]); 
+            tasks.links[taskIndex] = newStepIndex*1; 
+            saveTasksList(); 
+            displayTable(); 
+        }
+
+        function displayTable() {
+            document.querySelector('.table-container').innerHTML = createTables(); 
+            listenCells(); 
+        }
+
+        function addTask(name) {
+            tasks.tasks.push(name); 
+            saveTasksList(); 
+            displayTable(); 
+        }
+        function editTaskName(index, name) {
+            tasks.tasks[index] = name; 
+            saveTasksList(); 
+        }
+        function deleteTask(index) {
+            tasks.tasks.splice(index, 1); 
+            tasks.links.splice(index, 1); 
+            saveTasksList(); 
+            displayTable(); 
+        }
+
+    </script>
+
+</body>
+</html>
