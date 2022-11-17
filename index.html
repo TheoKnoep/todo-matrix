@@ -77,7 +77,7 @@
                     if ( tasks.links[index] === i) { mark = "<div class='mark'></div>" }
                     cells += `<td class="step-mark" data-row="${index}" data-col="${i}">${mark}</td>`; 
                 }
-                tableContent += `<tr>
+                tableContent += `<tr draggable="true" data-task-index="${index}" class="task-row">
                                     <td data-task-index="${index}" class="task-name" contenteditable>${task}</td>
                                     ${cells}
                                 </tr>`
@@ -119,6 +119,17 @@
                     let name = event.currentTarget.textContent; 
                     if (!name.length) { deleteTask(index) }
                 })
+            }); 
+            document.querySelectorAll('tr.task-row').forEach(tr => {
+                tr.addEventListener('dragstart', event => {
+                    console.log(event.srcElement); 
+                })
+                tr.addEventListener('dragend', event => {
+                    console.log('dragend', event); 
+                })
+                tr.addEventListener('drop', event => {
+                    console.log('drop', event); 
+                })
             })
         }
 
@@ -148,6 +159,17 @@
             tasks.links.splice(index, 1); 
             saveTasksList(); 
             displayTable(); 
+        }
+        function changeTaskOrder(index, newIndex) {
+            ArrayChangeOrder(tasks.tasks, index, newIndex); 
+            ArrayChangeOrder(tasks.links, index, newIndex); 
+            saveTasksList(); 
+            displayTable(); 
+        }
+
+        function ArrayChangeOrder(array, index, newIndex) {
+            if (newIndex > array.length) { return 'wrong ID' }; 
+            array.splice(newIndex, 0, array.splice(index, 1)[0]); 
         }
 
     </script>
