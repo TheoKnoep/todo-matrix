@@ -12,6 +12,9 @@
         tr:hover {
             background-color: #ffca3645;
         }
+        td, th {
+            border: none; 
+        }
 
         .step-mark {
             text-align: center;
@@ -44,7 +47,7 @@
     <main class="table-container">
 
     </main>
-    <button onclick="addTask(''); ">Ajouter une tâche</button>
+    <button onclick="addTask(''); document.querySelectorAll('.task-name')[ document.querySelectorAll('.task-name').length-1 ].focus(); ">Ajouter une tâche</button>
 
 
 
@@ -56,7 +59,7 @@
 
         /** UTILS */
         function initTaskList() {
-            return JSON.parse(localStorage.getItem('tasklist')) || ''; 
+            return JSON.parse(localStorage.getItem('tasklist')) || {tasks: [], steps: ['to do', 'going', 'DONE'], links: []}; 
         }
 
         function saveTasksList() {
@@ -147,6 +150,7 @@
 
         function addTask(name) {
             tasks.tasks.push(name); 
+            tasks.links.push(0); 
             saveTasksList(); 
             displayTable(); 
         }
